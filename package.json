@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gbrits/ionic-calendar.git"
+    "url": "git+https://github.com/Jayesh-Linkwok/ionic2-calendar.git"
   },
   "author": "jayesh_linkwok",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/gbrits/ionic-calendar/issues"
+    "url": "https://github.com/Jayesh-Linkwok/ionic2-calendar/issues"
   },
-  "homepage": "https://github.com/gbrits/ionic-calendar#readme",
+  "homepage": "https://github.com/Jayesh-Linkwok/ionic2-calendar#readme",
   "peerDependencies": {
     "@angular/common": "4.1.3",
     "@angular/compiler": "4.1.3",
