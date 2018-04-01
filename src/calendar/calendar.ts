@@ -5,7 +5,7 @@ import * as _ from "lodash";
 @Component({
     selector: 'ion-calendar',
     template: `
-    <ion-grid swipe($event)>
+    <ion-grid (swipe)="swipe($event)">
         <ion-row justify-content-center>
             <ion-col col-auto (click)="back()">
                 <ion-icon ios="ios-arrow-back" md="md-arrow-back"></ion-icon>
@@ -25,7 +25,7 @@ import * as _ from "lodash";
         <ion-row class="calendar-row" *ngFor="let week of weekArray;let i = index">
             <ion-col class="center calendar-col" (click)="daySelect(day,i,j)"
             *ngFor="let day of week;let j = index"
-            [ngClass]="[day.isThisMonth?'this-month':'not-this-month',day.isToday?'today':'',day.isSelect?'select':'']">
+            [ngClass]="[day.isThisMonth?'this-month':'not-this-month',day.isToday?'today':'',day.isSelect?'select':'',day.isHoliday?'holiday':'']">
                 {{day.date}}
                 <span class="eventBlip" *ngIf="day.hasEvent"></span>
             </ion-col>
@@ -41,7 +41,7 @@ export class Calendar {
     @Output() onDaySelect = new EventEmitter<dateObj>();
     @Output() onMonthSelect = new EventEmitter<any>();
     @Input() events: Array<singularDate> = [];
-    @Input() holidays: Array<singularDate> = [];
+    @Input() holidays: Array<holidayDate> = [];
 
     currentYear: number = moment().year();
     currentMonth: number = moment().month();
@@ -50,6 +50,7 @@ export class Calendar {
 
     displayYear: number = moment().year();
     displayMonth: number = moment().month();
+    displayDate: number = moment().date();
 
     dateArray: Array<dateObj> = []; // Array for all the days of the month
     weekArray = []; // Array for each row of the calendar
@@ -103,53 +104,47 @@ export class Calendar {
 
     toNextDay() {
         // Mark next day as a selection
-        let nextday = moment({ year: this.dateArray[this.lastSelect].year, month: this.dateArray[this.lastSelect].month, date: this.dateArray[this.lastSelect].date }).add(1, 'days');
-        let displayYear = nextday.year();
-        let displayMonth = nextday.month();
-        let displayDate = nextday.date();
-        this.createMonth(displayYear, displayMonth);
-        let isThisMonth = false;
-        if (displayMonth === this.currentMonth) {
-            isThisMonth = true;
-        }
+        let nextday = moment({ year: this.lastSelectIndex.year, month: this.lastSelectIndex.month, date: this.lastSelectIndex.date }).add(1, 'days');
+        this.displayYear = nextday.year();
+        this.displayMonth = nextday.month();
+        this.displayDate = nextday.date();
+        this.createMonth(this.displayYear, this.displayMonth);        
+
         let nextdayIndex = _.findIndex(this.dateArray, {
-            year: displayYear,
-            month: displayMonth,
-            date: displayDate,
-            isThisMonth: isThisMonth
+            year: this.displayYear,
+            month: this.displayMonth,
+            date: this.displayDate,
+            isThisMonth: true
         });
+
         this.lastSelect = nextdayIndex;
         this.dateArray[nextdayIndex].isSelect = true;
         this.dateArray[nextdayIndex].isToday = false;
         this.lastSelectIndex = this.dateArray[nextdayIndex];
         
-        console.log("To Next Day", displayDate+"/"+displayMonth+"/"+displayYear);
+        console.log("To Next Day", this.displayDate+", "+this.displayMonth+", "+this.displayYear);
         this.onDaySelect.emit(this.dateArray[nextdayIndex]);
     }
 
     toPreviousDay() {
         // Mark previous day as a selection
-        let previousday = moment({ year: this.dateArray[this.lastSelect].year, month: this.dateArray[this.lastSelect].month, date: this.dateArray[this.lastSelect].date }).subtract(1, 'days');
-        let displayYear = previousday.year();
-        let displayMonth = previousday.month();
-        let displayDate = previousday.date();
-        this.createMonth(displayYear, displayMonth);
-        let isThisMonth = false;
-        if(displayMonth === this.currentMonth){
-            isThisMonth = true;
-        }
+        let previousday = moment({ year: this.lastSelectIndex.year, month: this.lastSelectIndex.month, date: this.lastSelectIndex.date }).subtract(1, 'days');
+        this.displayYear = previousday.year();
+        this.displayMonth = previousday.month();
+        this.displayDate = previousday.date();
+        this.createMonth(this.displayYear, this.displayMonth);
         let previousdayIndex = _.findIndex(this.dateArray, {
-            year: displayYear,
-            month: displayMonth,
-            date: displayDate,
-            isThisMonth: isThisMonth
+            year: this.displayYear,
+            month: this.displayMonth,
+            date: this.displayDate,
+            isThisMonth: true
         });
         this.lastSelect = previousdayIndex;
         this.dateArray[previousdayIndex].isSelect = true;
         this.dateArray[previousdayIndex].isToday = false;
         this.lastSelectIndex = this.dateArray[previousdayIndex];
 
-        console.log("To Next Day", displayDate + "/" + displayMonth + "/" + displayYear);
+        console.log("To Previous Day", this.displayDate + ", " + this.displayMonth + ", " + this.displayYear);
         this.onDaySelect.emit(this.dateArray[previousdayIndex]);
     }
 
@@ -163,7 +158,7 @@ export class Calendar {
       return false;
     }
 
-    isInHoliday(year,month,date){
+    isInHoliday(year,month,date){        
         var i = 0, len = this.holidays.length;
         for (; i < len; i++) {
             if (this.holidays[i].year == year && this.holidays[i].month == month && this.holidays[i].date == date) {
@@ -211,7 +206,7 @@ export class Calendar {
                         isToday: false,
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, 11, lastMonthStart+i)) ? true : false,
-                        isHoliday: (this.isInHoliday(year, 11, lastMonthStart+i)) ? true : false,
+                        isHoliday: this.isInHoliday(year, 11, lastMonthStart+i) ? true : false,
                     })
                 } else {
                     this.dateArray.push({
@@ -222,7 +217,7 @@ export class Calendar {
                         isToday: false,
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, month-1, lastMonthStart+i)) ? true : false,
-                        isHoliday: (this.isInHoliday(year, month-1, lastMonthStart+i)) ? true : false,
+                        isHoliday: this.isInHoliday(year, month-1, lastMonthStart+i) ? true : false,
                     })
                 }
 
@@ -239,7 +234,7 @@ export class Calendar {
                 isToday: false,
                 isSelect: false,
                 hasEvent: (this.isInEvents(year, month, i+1)) ? true : false,
-                isHoliday: (this.isInHoliday(year, month, i+1)) ? true : false,
+                isHoliday: this.isInHoliday(year, month, i+1) ? true : false,
             })
         }
 
@@ -266,7 +261,7 @@ export class Calendar {
                         isToday: false,
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, 0, i+1)) ? true : false,
-                        isHoliday: (this.isInHoliday(year, 0, i+1)) ? true : false,
+                        isHoliday: this.isInHoliday(year, 0, i+1) ? true : false,
                     })
                 } else {
                     this.dateArray.push({
@@ -277,7 +272,7 @@ export class Calendar {
                         isToday: false,
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, month+1, i+1)) ? true : false,
-                        isHoliday: (this.isInHoliday(year, month+1, i+1)) ? true : false,
+                        isHoliday: this.isInHoliday(year, month+1, i+1) ? true : false,
                     })
                 }
 
@@ -333,8 +328,35 @@ export class Calendar {
         // Store this clicked status
         this.lastSelect = i * 7 + j;
         this.dateArray[i * 7 + j].isSelect = true;
-
+        this.lastSelectIndex = this.dateArray[i * 7 + j];
         this.onDaySelect.emit(day);
+    }
+
+    getSelectedDate(){
+        return {
+            year: this.lastSelectIndex.year,
+            month: this.lastSelectIndex.month,
+            date: this.lastSelectIndex.date
+        };
+    }
+
+    getSelectedDateString(){
+        let date = moment({ year: this.lastSelectIndex.year, month: this.lastSelectIndex.month, date: this.lastSelectIndex.date })
+        // February 20, 2018
+        return date.format('MMMM DD, YYYY');
+    }
+
+    getHolidayReason(){
+        let year = this.lastSelectIndex.year;
+        let month = this.lastSelectIndex.month;
+        let date = this.lastSelectIndex.date;
+        var i = 0, len = this.holidays.length;
+        for (; i < len; i++) {
+            if (this.holidays[i].year == year && this.holidays[i].month == month && this.holidays[i].date == date) {
+                return this.holidays[i].reason;
+            }
+        }
+        return '';
     }
 }
 
@@ -342,6 +364,13 @@ interface singularDate {
   year: number,
   month: number,
   date: number
+}
+
+interface holidayDate {
+    year: number,
+    month: number,
+    date: number,
+    reason:string
 }
 
 // Each grid item of a calendar
