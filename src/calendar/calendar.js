@@ -26,7 +26,6 @@ var Calendar = /** @class */ (function () {
         this.displayDate = moment().date();
         this.dateArray = []; // Array for all the days of the month
         this.weekArray = []; // Array for each row of the calendar
-        this.lastSelect = 0; // Record the last clicked location
         this.weekHead = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         this.todayIndexObject = {
             year: this.currentYear,
@@ -57,7 +56,8 @@ var Calendar = /** @class */ (function () {
         this.createMonth(this.currentYear, this.currentMonth);
         // Mark today as a selection
         var todayIndex = _.findIndex(this.dateArray, this.todayIndexObject);
-        this.lastSelect = todayIndex;
+        // this.lastSelect = todayIndex;
+        this.unSelectDay();
         this.dateArray[todayIndex].isSelect = true;
         this.lastSelectIndex = this.dateArray[todayIndex];
         this.onDaySelect.emit(this.dateArray[todayIndex]);
@@ -75,7 +75,8 @@ var Calendar = /** @class */ (function () {
             date: this.displayDate,
             isThisMonth: true
         });
-        this.lastSelect = nextdayIndex;
+        // this.lastSelect = nextdayIndex;
+        this.unSelectDay();
         this.dateArray[nextdayIndex].isSelect = true;
         this.dateArray[nextdayIndex].isToday = false;
         this.lastSelectIndex = this.dateArray[nextdayIndex];
@@ -95,7 +96,8 @@ var Calendar = /** @class */ (function () {
             date: this.displayDate,
             isThisMonth: true
         });
-        this.lastSelect = previousdayIndex;
+        // this.lastSelect = previousdayIndex;
+        this.unSelectDay();
         this.dateArray[previousdayIndex].isSelect = true;
         this.dateArray[previousdayIndex].isToday = false;
         this.lastSelectIndex = this.dateArray[previousdayIndex];
@@ -148,14 +150,14 @@ var Calendar = /** @class */ (function () {
             for (var i = 0; i < firstDay; i++) {
                 if (month === 0) {
                     this.dateArray.push({
-                        year: year,
+                        year: year - 1,
                         month: 11,
                         date: lastMonthStart + i,
                         isThisMonth: false,
                         isToday: false,
                         isSelect: false,
-                        hasEvent: (this.isInEvents(year, 11, lastMonthStart + i)) ? true : false,
-                        isHoliday: this.isInHoliday(year, 11, lastMonthStart + i) ? true : false,
+                        hasEvent: (this.isInEvents(year - 1, 11, lastMonthStart + i)) ? true : false,
+                        isHoliday: this.isInHoliday(year - 1, 11, lastMonthStart + i) ? true : false,
                     });
                 }
                 else {
@@ -194,20 +196,29 @@ var Calendar = /** @class */ (function () {
             });
             this.dateArray[todayIndex].isToday = true;
         }
+        if (this.lastSelectIndex) {
+            var lastSel = this.lastSelectIndex;
+            lastSel.isSelect = false;
+            var lastIndex = _.findIndex(this.dateArray, lastSel);
+            console.log(this.lastSelectIndex);
+            if (lastIndex !== -1) {
+                this.dateArray[lastIndex].isSelect = true;
+            }
+        }
         // Add the number of days next month to the array, with some months showing 6 weeks and some months showing 5 weeks
         if (this.dateArray.length % 7 !== 0) {
             var nextMonthAdd = 7 - this.dateArray.length % 7;
             for (var i = 0; i < nextMonthAdd; i++) {
                 if (month === 11) {
                     this.dateArray.push({
-                        year: year,
+                        year: year + 1,
                         month: 0,
                         date: i + 1,
                         isThisMonth: false,
                         isToday: false,
                         isSelect: false,
-                        hasEvent: (this.isInEvents(year, 0, i + 1)) ? true : false,
-                        isHoliday: this.isInHoliday(year, 0, i + 1) ? true : false,
+                        hasEvent: (this.isInEvents(year + 1, 0, i + 1)) ? true : false,
+                        isHoliday: this.isInHoliday(year + 1, 0, i + 1) ? true : false,
                     });
                 }
                 else {
@@ -266,13 +277,31 @@ var Calendar = /** @class */ (function () {
     };
     // Select a day, click event
     Calendar.prototype.daySelect = function (day, i, j) {
-        // First clear the last click status
-        this.dateArray[this.lastSelect].isSelect = false;
-        // Store this clicked status
-        this.lastSelect = i * 7 + j;
-        this.dateArray[i * 7 + j].isSelect = true;
-        this.lastSelectIndex = this.dateArray[i * 7 + j];
+        // // First clear the last click status
+        // this.dateArray[this.lastSelect].isSelect = false;
+        // // Store this clicked status
+        // this.lastSelect = i * 7 + j;
+        // this.dateArray[i * 7 + j].isSelect = true;
+        // this.lastSelectIndex = this.dateArray[i * 7 + j];
+        this.unSelectDay();
+        var selectedIndex = _.findIndex(this.dateArray, day);
+        this.dateArray[selectedIndex].isSelect = true;
+        this.lastSelectIndex = day;
         this.onDaySelect.emit(day);
+    };
+    Calendar.prototype.unSelectDay = function () {
+        if (this.lastSelectIndex) {
+            var lastSelectedIndex = _.findIndex(this.dateArray, this.lastSelectIndex);
+            if (lastSelectedIndex !== -1) {
+                this.dateArray[lastSelectedIndex].isSelect = false;
+            }
+            var lastSel = this.lastSelectIndex;
+            lastSel.isSelect = true;
+            lastSelectedIndex = _.findIndex(this.dateArray, this.lastSelectIndex);
+            if (lastSelectedIndex !== -1) {
+                this.dateArray[lastSelectedIndex].isSelect = false;
+            }
+        }
     };
     Calendar.prototype.getSelectedDate = function () {
         return {
