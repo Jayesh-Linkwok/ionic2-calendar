@@ -25,6 +25,7 @@ import * as _ from "lodash";
         <ion-row class="calendar-row" *ngFor="let week of weekArray;let i = index">
             <ion-col class="center calendar-col" (click)="daySelect(day,i,j)"
             *ngFor="let day of week;let j = index"
+            [ngStyle]="day.attendance"
             [ngClass]="[day.isThisMonth?'this-month':'not-this-month',day.isToday?'today':'',day.isSelect?'select':'',day.isHoliday?'holiday':'']">
                 {{day.date}}
                 <span class="eventBlip" *ngIf="day.hasEvent"></span>
@@ -42,6 +43,7 @@ export class Calendar {
     @Output() onMonthSelect = new EventEmitter<any>();
     @Input() events: Array<singularDate> = [];
     @Input() holidays: Array<holidayDate> = [];
+    @Input() attendance: Array<attendance> = [];
 
     currentYear: number = moment().year();
     currentMonth: number = moment().month();
@@ -170,6 +172,29 @@ export class Calendar {
         }
         return false;
     }
+    
+    isInAttendance(year, month, date) {
+        var i = 0, len = this.attendance.length;
+        for (; i < len; i++) {
+            if (this.attendance[i].year == year && this.attendance[i].month == month && this.attendance[i].date == date) {
+                return {
+                    background: this.attendance[i].background,
+                    color: this.attendance[i].color
+                };
+            }
+        }
+        return "";
+    }
+
+    getAttendance(year, month, date) {
+        var i = 0, len = this.attendance.length;
+        for (; i < len; i++) {
+            if (this.attendance[i].year == year && this.attendance[i].month == month && this.attendance[i].date == date) {
+                return this.attendance[i].data;
+            }
+        }
+        return "";
+    }
 
     createMonth(year: number, month: number) {
         this.dateArray = []; // Clear last month's data
@@ -210,6 +235,8 @@ export class Calendar {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year-1, 11, lastMonthStart+i)) ? true : false,
                         isHoliday: this.isInHoliday(year-1, 11, lastMonthStart+i) ? true : false,
+                        attendance: this.isInAttendance(year - 1, 11, lastMonthStart + i),
+                        attendanceData: this.getAttendance(year - 1, 11, lastMonthStart + i),
                     })
                 } else {
                     this.dateArray.push({
@@ -221,6 +248,8 @@ export class Calendar {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, month-1, lastMonthStart+i)) ? true : false,
                         isHoliday: this.isInHoliday(year, month-1, lastMonthStart+i) ? true : false,
+                        attendance: this.isInAttendance(year, month - 1, lastMonthStart + i),
+                        attendanceData: this.getAttendance(year, month - 1, lastMonthStart + i),
                     })
                 }
 
@@ -238,6 +267,8 @@ export class Calendar {
                 isSelect: false,
                 hasEvent: (this.isInEvents(year, month, i+1)) ? true : false,
                 isHoliday: this.isInHoliday(year, month, i+1) ? true : false,
+                attendance: this.isInAttendance(year, month, i + 1),
+                attendanceData: this.getAttendance(year, month, i + 1),
             })
         }
 
@@ -276,6 +307,8 @@ export class Calendar {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year+1, 0, i+1)) ? true : false,
                         isHoliday: this.isInHoliday(year+1, 0, i+1) ? true : false,
+                        attendance: this.isInAttendance(year + 1, 0, i + 1),
+                        attendanceData: this.getAttendance(year + 1, 0, i + 1),
                     })
                 } else {
                     this.dateArray.push({
@@ -287,6 +320,8 @@ export class Calendar {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, month+1, i+1)) ? true : false,
                         isHoliday: this.isInHoliday(year, month+1, i+1) ? true : false,
+                        attendance: this.isInAttendance(year, month + 1, i + 1),
+                        attendanceData: this.getAttendance(year, month + 1, i + 1),
                     })
                 }
 
@@ -409,6 +444,15 @@ interface holidayDate {
     reason:string
 }
 
+interface attendance {
+    year: number,
+    month: number,
+    date: number,
+    background: string,
+    color: string,
+    data:any
+}
+
 // Each grid item of a calendar
 interface dateObj {
     year: number,
@@ -419,4 +463,6 @@ interface dateObj {
     isSelect?: boolean,
     isHoliday?: boolean,
     hasEvent?: boolean,
+    attendance?:any,
+    attendanceData?: any
 }

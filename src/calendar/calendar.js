@@ -17,6 +17,7 @@ var Calendar = /** @class */ (function () {
         this.onMonthSelect = new EventEmitter();
         this.events = [];
         this.holidays = [];
+        this.attendance = [];
         this.currentYear = moment().year();
         this.currentMonth = moment().month();
         this.currentDate = moment().date();
@@ -122,6 +123,27 @@ var Calendar = /** @class */ (function () {
         }
         return false;
     };
+    Calendar.prototype.isInAttendance = function (year, month, date) {
+        var i = 0, len = this.attendance.length;
+        for (; i < len; i++) {
+            if (this.attendance[i].year == year && this.attendance[i].month == month && this.attendance[i].date == date) {
+                return {
+                    background: this.attendance[i].background,
+                    color: this.attendance[i].color
+                };
+            }
+        }
+        return "";
+    };
+    Calendar.prototype.getAttendance = function (year, month, date) {
+        var i = 0, len = this.attendance.length;
+        for (; i < len; i++) {
+            if (this.attendance[i].year == year && this.attendance[i].month == month && this.attendance[i].date == date) {
+                return this.attendance[i].data;
+            }
+        }
+        return "";
+    };
     Calendar.prototype.createMonth = function (year, month) {
         this.dateArray = []; // Clear last month's data
         this.weekArray = []; // Clear week data
@@ -158,6 +180,8 @@ var Calendar = /** @class */ (function () {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year - 1, 11, lastMonthStart + i)) ? true : false,
                         isHoliday: this.isInHoliday(year - 1, 11, lastMonthStart + i) ? true : false,
+                        attendance: this.isInAttendance(year - 1, 11, lastMonthStart + i),
+                        attendanceData: this.getAttendance(year - 1, 11, lastMonthStart + i),
                     });
                 }
                 else {
@@ -170,6 +194,8 @@ var Calendar = /** @class */ (function () {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, month - 1, lastMonthStart + i)) ? true : false,
                         isHoliday: this.isInHoliday(year, month - 1, lastMonthStart + i) ? true : false,
+                        attendance: this.isInAttendance(year, month - 1, lastMonthStart + i),
+                        attendanceData: this.getAttendance(year, month - 1, lastMonthStart + i),
                     });
                 }
             }
@@ -185,6 +211,8 @@ var Calendar = /** @class */ (function () {
                 isSelect: false,
                 hasEvent: (this.isInEvents(year, month, i + 1)) ? true : false,
                 isHoliday: this.isInHoliday(year, month, i + 1) ? true : false,
+                attendance: this.isInAttendance(year, month, i + 1),
+                attendanceData: this.getAttendance(year, month, i + 1),
             });
         }
         if (this.currentYear === year && this.currentMonth === month) {
@@ -219,6 +247,8 @@ var Calendar = /** @class */ (function () {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year + 1, 0, i + 1)) ? true : false,
                         isHoliday: this.isInHoliday(year + 1, 0, i + 1) ? true : false,
+                        attendance: this.isInAttendance(year + 1, 0, i + 1),
+                        attendanceData: this.getAttendance(year + 1, 0, i + 1),
                     });
                 }
                 else {
@@ -231,6 +261,8 @@ var Calendar = /** @class */ (function () {
                         isSelect: false,
                         hasEvent: (this.isInEvents(year, month + 1, i + 1)) ? true : false,
                         isHoliday: this.isInHoliday(year, month + 1, i + 1) ? true : false,
+                        attendance: this.isInAttendance(year, month + 1, i + 1),
+                        attendanceData: this.getAttendance(year, month + 1, i + 1),
                     });
                 }
             }
@@ -343,10 +375,14 @@ var Calendar = /** @class */ (function () {
         Input(),
         __metadata("design:type", Array)
     ], Calendar.prototype, "holidays", void 0);
+    __decorate([
+        Input(),
+        __metadata("design:type", Array)
+    ], Calendar.prototype, "attendance", void 0);
     Calendar = __decorate([
         Component({
             selector: 'ion-calendar',
-            template: "\n    <ion-grid (swipe)=\"swipe($event)\">\n        <ion-row justify-content-center>\n            <ion-col col-auto (click)=\"back()\">\n                <ion-icon ios=\"ios-arrow-back\" md=\"md-arrow-back\"></ion-icon>\n            </ion-col>\n            <ion-col col-auto>\n                <div>{{displayMonth + 1 | monthName}} - {{displayYear}}</div>\n            </ion-col>\n            <ion-col col-auto (click)=\"forward()\">\n                <ion-icon ios=\"ios-arrow-forward\" md=\"md-arrow-forward\"></ion-icon>\n            </ion-col>\n        </ion-row>\n\n        <ion-row>\n            <ion-col class=\"center calendar-header-col\" *ngFor=\"let head of weekHead\">{{head}}</ion-col>\n        </ion-row>\n\n        <ion-row class=\"calendar-row\" *ngFor=\"let week of weekArray;let i = index\">\n            <ion-col class=\"center calendar-col\" (click)=\"daySelect(day,i,j)\"\n            *ngFor=\"let day of week;let j = index\"\n            [ngClass]=\"[day.isThisMonth?'this-month':'not-this-month',day.isToday?'today':'',day.isSelect?'select':'',day.isHoliday?'holiday':'']\">\n                {{day.date}}\n                <span class=\"eventBlip\" *ngIf=\"day.hasEvent\"></span>\n            </ion-col>\n        </ion-row>\n\n    </ion-grid>\n"
+            template: "\n    <ion-grid (swipe)=\"swipe($event)\">\n        <ion-row justify-content-center>\n            <ion-col col-auto (click)=\"back()\">\n                <ion-icon ios=\"ios-arrow-back\" md=\"md-arrow-back\"></ion-icon>\n            </ion-col>\n            <ion-col col-auto>\n                <div>{{displayMonth + 1 | monthName}} - {{displayYear}}</div>\n            </ion-col>\n            <ion-col col-auto (click)=\"forward()\">\n                <ion-icon ios=\"ios-arrow-forward\" md=\"md-arrow-forward\"></ion-icon>\n            </ion-col>\n        </ion-row>\n\n        <ion-row>\n            <ion-col class=\"center calendar-header-col\" *ngFor=\"let head of weekHead\">{{head}}</ion-col>\n        </ion-row>\n\n        <ion-row class=\"calendar-row\" *ngFor=\"let week of weekArray;let i = index\">\n            <ion-col class=\"center calendar-col\" (click)=\"daySelect(day,i,j)\"\n            *ngFor=\"let day of week;let j = index\"\n            [ngStyle]=\"day.attendance\"\n            [ngClass]=\"[day.isThisMonth?'this-month':'not-this-month',day.isToday?'today':'',day.isSelect?'select':'',day.isHoliday?'holiday':'']\">\n                {{day.date}}\n                <span class=\"eventBlip\" *ngIf=\"day.hasEvent\"></span>\n            </ion-col>\n        </ion-row>\n\n    </ion-grid>\n"
         }),
         __metadata("design:paramtypes", [])
     ], Calendar);

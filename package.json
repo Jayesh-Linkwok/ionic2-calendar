@@ -1,7 +1,7 @@
 {
   "name": "ionic2-calendar-en",
-  "version": "1.1.6",
-  "description": "An event calendar component for the Ionic hybrid mobile development platform",
+  "version": "1.1.7",
+  "description": "An event, attendance & holidays calendar component for the Ionic hybrid mobile development platform",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -14,9 +14,11 @@
   "author": "jayesh_linkwok",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Jayesh-Linkwok/ionic2-calendar/issues"
+    "url": "https://github.com/Jayesh-Linkwok/ionic2-calendar/issues",
+    "email": "jayesh@linkwok.com"
   },
   "homepage": "https://github.com/Jayesh-Linkwok/ionic2-calendar#readme",
+  "private": true,
   "peerDependencies": {
     "@angular/common": "4.1.3",
     "@angular/compiler": "4.1.3",
@@ -35,5 +37,29 @@
   "devDependencies": {
     "typescript": "^2.8.1"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "keywords": [
+    "",
+    "attendance",
+    "calendar",
+    "en",
+    "english",
+    "events",
+    "ionic",
+    "ionic--calendar",
+    "ionic--calendar-en",
+    "ionic--calendar-english",
+    "ionic2-calendar-en",
+    "ionic2-calendar-english",
+    "ionic3-calendar-en",
+    "ionic3-calendar-english",
+    "calendar",
+    "ionic2-calendar",
+    "ionic3-calendar",
+    "events",
+    "attendance",
+    "ionic",
+    "ionic-2",
+    "ionic-3"
+  ]
 }

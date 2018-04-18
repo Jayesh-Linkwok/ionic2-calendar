@@ -16,6 +16,7 @@ ion-calendar {
       justify-content: center;
       padding: 0.8rem;
       font-size: 1.2rem;
+      font-weight: bolder;
       border-left: 1px solid #eee;
       border-top: 1px solid #eee;
       &:last-child {
@@ -46,14 +47,16 @@ ion-calendar {
     .select {
       box-shadow: none;
       color: #fff !important;
-      background: #488aff;
+      background: #488aff !important;
     }
     .holiday {
+      border: 1px dashed red;
       box-shadow: none;
+      background: #fff;
       color: red;
-    }
-    .holiday.select {
-      background: red !important;
+      &.select{
+        background: red !important;
+      }
     }
   }
 }
