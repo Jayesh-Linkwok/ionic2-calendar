@@ -41,6 +41,12 @@ var Calendar = /** @class */ (function () {
         this.createMonth(this.displayYear, this.displayMonth);
     };
     Calendar.prototype.ngAfterContentInit = function () {
+        this.onMonthSelect.emit({
+            'year': this.displayYear,
+            'month': this.displayMonth
+        });
+        var todayIndex = _.findIndex(this.dateArray, this.todayIndexObject);
+        this.onDaySelect.emit(this.dateArray[todayIndex]);
     };
     Calendar.prototype.swipe = function (event) {
         if (event.direction === 2) {

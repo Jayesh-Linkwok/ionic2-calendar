@@ -78,6 +78,12 @@ export class Calendar {
     }
 
     ngAfterContentInit() {
+        this.onMonthSelect.emit({
+            'year': this.displayYear,
+            'month': this.displayMonth
+        });
+        let todayIndex = _.findIndex(this.dateArray, this.todayIndexObject);
+        this.onDaySelect.emit(this.dateArray[todayIndex]);
     }
 
     swipe(event) {
